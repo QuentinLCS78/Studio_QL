@@ -4,11 +4,27 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Studio QL — Sites internet sur-mesure</title>
-<meta name="description" content="Création de sites internet sur-mesure pour particuliers et indépendants : motion design, 3D temps réel, animations au scroll.">
+<meta name="description" content="Création de sites internet sur-mesure pour particuliers et indépendants, partout en France et à distance : motion design, 3D temps réel, animations au scroll.">
 <meta name="theme-color" content="#000000">
 <meta name="author" content="Quentin LUCAS">
+<link rel="canonical" href="https://studioql.fr/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="Studio QL">
+<meta property="og:url" content="https://studioql.fr/">
+<meta property="og:title" content="Studio QL — Sites internet sur-mesure">
+<meta property="og:description" content="Création de sites internet sur-mesure pour particuliers et indépendants, partout en France et à distance : motion design, 3D temps réel, animations au scroll.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Studio QL — Sites internet sur-mesure">
+<meta name="twitter:description" content="Création de sites internet sur-mesure pour particuliers et indépendants, partout en France et à distance.">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Person","name":"Quentin Lucas","givenName":"Quentin","familyName":"Lucas","jobTitle":"Ingénieur informatique","description":"Conception et développement de sites web sur-mesure pour particuliers et indépendants.","knowsAbout":["Développement web","Motion design","WebGL","Responsive design","Référencement"]}
+{"@context":"https://schema.org","@graph":[
+{"@type":"WebSite","@id":"https://studioql.fr/#website","url":"https://studioql.fr/","name":"Studio QL","inLanguage":"fr-FR","publisher":{"@id":"https://studioql.fr/#studio"}},
+{"@type":"ProfessionalService","@id":"https://studioql.fr/#studio","name":"Studio QL","url":"https://studioql.fr/","description":"Création de sites internet sur-mesure pour particuliers et indépendants, en France et à distance.","areaServed":{"@type":"Country","name":"France"},"availableLanguage":"fr","founder":{"@id":"https://studioql.fr/#quentin"},"serviceType":["Création de site internet","Site vitrine sur-mesure","Motion design web","Animations 3D WebGL"],"knowsAbout":["Développement web","Motion design","WebGL","Responsive design","Référencement"]},
+{"@type":"Person","@id":"https://studioql.fr/#quentin","name":"Quentin Lucas","givenName":"Quentin","familyName":"Lucas","jobTitle":"Ingénieur informatique","url":"https://studioql.fr/","worksFor":{"@id":"https://studioql.fr/#studio"}}
+]}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -101,6 +117,7 @@ button{font:inherit}
 .orb-fb{display:none;position:absolute;left:50%;top:50%;width:min(50vh,68vw);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle at 38% 22%,rgba(255,255,255,.6),transparent 16%),radial-gradient(circle at 50% 50%,#0b0b0d 58%,#16161b 72%,rgba(41,151,255,.35) 100%);box-shadow:inset -24px -8px 60px rgba(41,151,255,.3),inset 24px 8px 60px rgba(255,120,60,.15)}
 .hero-copy{position:relative;z-index:2;will-change:transform,opacity}
 .hero-label{font-family:var(--f-disp);font-size:32px;line-height:36px;font-weight:600;letter-spacing:.004em;margin-bottom:6px}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 .display{font-family:var(--f-disp);font-weight:600;font-size:clamp(48px,8vw,80px);line-height:1.05;letter-spacing:-.015em}
 .hero-title .w{display:inline-block;overflow:hidden;padding:0 .02em .1em;margin-bottom:-.1em;vertical-align:top}
 .hero-title .w>span{display:inline-block;transform:translateY(105%);filter:blur(10px);opacity:0;animation:wordUp 1.3s var(--ease) forwards;animation-delay:calc(.45s + var(--i) * .08s)}
@@ -459,6 +476,7 @@ footer{background:#000;color:var(--ash);font-size:12px;line-height:16px;padding:
   <div class="hero-copy" id="heroCopy">
     <p class="hero-label fade" style="--d:.2s" data-cfg="brand">Studio QL</p>
     <h1 class="display hero-title">
+      <span class="sr-only">Studio QL, création de sites internet sur-mesure : </span>
       <span class="w"><span style="--i:0">Des</span></span> <span class="w"><span style="--i:1">sites</span></span> <span class="w"><span style="--i:2">qui</span></span><br>
       <span class="w"><span style="--i:3">se</span></span> <span class="w"><span style="--i:4">vivent.</span></span>
     </h1>
