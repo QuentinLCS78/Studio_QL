@@ -8,7 +8,15 @@
 <meta name="theme-color" content="#000000">
 <meta name="author" content="Quentin LUCAS">
 <link rel="canonical" href="https://studioql.fr/">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:image" content="https://studioql.fr/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Studio QL — Sites internet sur-mesure">
+<meta name="twitter:image" content="https://studioql.fr/og-image.png">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
@@ -22,7 +30,7 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
 {"@type":"WebSite","@id":"https://studioql.fr/#website","url":"https://studioql.fr/","name":"Studio QL","alternateName":["StudioQL","studioql.fr"],"inLanguage":"fr-FR","publisher":{"@id":"https://studioql.fr/#studio"}},
-{"@type":"ProfessionalService","@id":"https://studioql.fr/#studio","name":"Studio QL","alternateName":"StudioQL","url":"https://studioql.fr/","description":"Création de sites internet sur-mesure pour particuliers et indépendants, en France et à distance.","areaServed":{"@type":"Country","name":"France"},"availableLanguage":"fr","founder":{"@id":"https://studioql.fr/#quentin"},"serviceType":["Création de site internet","Site vitrine sur-mesure","Motion design web","Animations 3D WebGL"],"knowsAbout":["Développement web","Motion design","WebGL","Responsive design","Référencement"]},
+{"@type":"ProfessionalService","@id":"https://studioql.fr/#studio","name":"Studio QL","alternateName":"StudioQL","url":"https://studioql.fr/","logo":"https://studioql.fr/icon-192.png","image":"https://studioql.fr/og-image.png","description":"Création de sites internet sur-mesure pour particuliers et indépendants, en France et à distance.","areaServed":{"@type":"Country","name":"France"},"availableLanguage":"fr","founder":{"@id":"https://studioql.fr/#quentin"},"serviceType":["Création de site internet","Site vitrine sur-mesure","Motion design web","Animations 3D WebGL"],"knowsAbout":["Développement web","Motion design","WebGL","Responsive design","Référencement"]},
 {"@type":"Person","@id":"https://studioql.fr/#quentin","name":"Quentin Lucas","givenName":"Quentin","familyName":"Lucas","jobTitle":"Ingénieur informatique","url":"https://studioql.fr/","worksFor":{"@id":"https://studioql.fr/#studio"}}
 ]}
 </script>
@@ -778,7 +786,7 @@ footer{background:#000;color:var(--ash);font-size:12px;line-height:16px;padding:
 <footer>
   <div class="container foot-in">
     <span>© <span id="year">2026</span> <span data-cfg="brand">Studio QL</span> — <span data-cfg="prenom">Quentin</span> <span data-cfg="nom">LUCAS</span>, création de sites internet sur-mesure.</span>
-    <nav><a href="mentions-legales.html">Mentions légales</a><a href="#contact">Contact</a></nav>
+    <nav><a href="/mentions-legales">Mentions légales</a><a href="#contact">Contact</a></nav>
   </div>
 </footer>
 
@@ -844,8 +852,12 @@ const isVis = el => !!vis.get(el);
 const orb = (() => {
   const cv = $('#orb');
   const fb = () => { cv.style.display = 'none'; $('.orb-fb').style.display = 'block'; return null; };
-  const gl = cv.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'high-performance' });
+  const gl = cv.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'high-performance', failIfMajorPerformanceCaveat: true });
   if (!gl) return fb();
+  // Rendu logiciel (sans carte graphique) : le shader tournerait sur le processeur et bloquerait la page
+  const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+  const renderer = String(gl.getParameter(dbg ? dbg.UNMASKED_RENDERER_WEBGL : gl.RENDERER) || '');
+  if (/swiftshader|llvmpipe|softpipe|software|basic render/i.test(renderer)) return fb();
   const VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
   const FS = `precision highp float;
 uniform vec2 R;uniform float T;uniform vec2 M;uniform float S;
@@ -937,18 +949,29 @@ const mqRows = [$('#mq1'), $('#mq2')];
 const mqAnims = () => mqRows.flatMap(r => $$('.mq-track', r).flatMap(t => t.getAnimations ? t.getAnimations() : []));
 let mqA = [];
 
-const secProgress = el => { const r = el.getBoundingClientRect(); const tot = r.height - innerHeight; return { r, p: tot > 0 ? clamp(-r.top / tot) : 0 }; };
-let hsDist = 0;
+// Positions des sections mesurées une fois (chargement, redimensionnement), jamais à chaque image :
+// lire la mise en page juste après avoir modifié des styles force le navigateur à tout recalculer.
+const G = { heroH: innerHeight, dev: { t: 0, h: 0 }, mf: { t: 0, h: 0 }, hs: { t: 0, h: 0 }, steps: [] };
+let hsDist = 0, hsShift = 0;
 const hsSize = () => { hsDist = Math.max(0, track.offsetWidth - innerWidth); hs.style.height = (hsDist + innerHeight * 1.15) + 'px'; };
-hsSize();
-addEventListener('resize', hsSize);
-addEventListener('load', () => { hsSize(); mqA = mqAnims(); });
+const measure = () => {
+  const y = scrollY, box = el => { const r = el.getBoundingClientRect(); return { t: r.top + y, h: r.height }; };
+  G.heroH = hero.offsetHeight || innerHeight;
+  G.dev = box(dev); G.mf = box(mf); G.hs = box(hs);
+  const tl = track.getBoundingClientRect().left + hsShift; // position du rail sans son décalage horizontal
+  G.steps = steps.map(st => st.getBoundingClientRect().left - track.getBoundingClientRect().left + tl);
+};
+const secProgress = g => { const top = g.t - scrollY, tot = g.h - innerHeight; return { top, bottom: top + g.h, p: tot > 0 ? clamp(-top / tot) : 0 }; };
+hsSize(); measure();
+addEventListener('resize', () => { hsSize(); measure(); });
+addEventListener('load', () => { hsSize(); measure(); mqA = mqAnims(); });
+new ResizeObserver(measure).observe(document.body);
 
 let lastY = scrollY, vel = 0;
 function scrollFx(now) {
   const y = scrollY, vh = innerHeight;
   // hero
-  const hp = clamp(y / (hero.offsetHeight || vh));
+  const hp = clamp(y / G.heroH);
   if (hp < 1) {
     heroCopy.style.transform = `translateY(${-hp * 80}px)`;
     heroCopy.style.opacity = 1 - hp * 1.5;
@@ -958,8 +981,8 @@ function scrollFx(now) {
   lnav.classList.toggle('show', y > vh * .75);
 
   // device
-  { const { r, p } = secProgress(dev);
-    if (r.bottom > 0 && r.top < vh) {
+  { const { top, bottom, p } = secProgress(G.dev);
+    if (bottom > 0 && top < vh) {
       // chaque mot occupe un tiers du défilement : apparition, pause, disparition (le dernier reste)
       pWords.forEach((w, i) => {
         const t = (p - .04) / .9 * pWords.length - i, last = i === pWords.length - 1;
@@ -974,19 +997,20 @@ function scrollFx(now) {
     } }
 
   // manifeste
-  { const { r, p } = secProgress(mf);
-    if (r.bottom > 0 && r.top < vh) {
+  { const { top, bottom, p } = secProgress(G.mf);
+    if (bottom > 0 && top < vh) {
       const lit = RM ? words.length : (p * 1.15 - .05) * words.length;
       words.forEach((s, i) => { s.style.opacity = (.15 + .85 * clamp(lit - i)).toFixed(3); });
     } }
 
   // process horizontal
-  { const { r, p } = secProgress(hs);
-    if (r.bottom > 0 && r.top < vh) {
+  { const { top, bottom, p } = secProgress(G.hs);
+    if (bottom > 0 && top < vh) {
       const q = clamp(p / .9);
-      track.style.transform = `translate3d(${-q * hsDist}px,0,0)`;
+      hsShift = q * hsDist;
+      track.style.transform = `translate3d(${-hsShift}px,0,0)`;
       hsBar.style.transform = `scaleX(${q})`;
-      steps.forEach(s => { const b = s.getBoundingClientRect(); s.classList.toggle('on', b.left < innerWidth * .62); });
+      steps.forEach((s, i) => s.classList.toggle('on', G.steps[i] - hsShift < innerWidth * .62));
     } }
 
   // marquee : inclinaison + vitesse selon le scroll
@@ -1242,12 +1266,12 @@ if (TOUCH) $$('[data-touch]').forEach(el => el.textContent = el.dataset.touch);
 
 /* 08 — projecteur */
 (() => {
-  const tile = $('#d-spot'); let hover = false, tx = 0, ty = 0, cx = 0, cy = 0;
+  const tile = $('#d-spot'); let hover = false, tx = 0, ty = 0, cx = 0, cy = 0, W = 0, H = 0;
   vio.observe(tile);
+  new ResizeObserver(() => { W = tile.clientWidth; H = tile.clientHeight; }).observe(tile);
   follow(tile, (x, y) => { const r = tile.getBoundingClientRect(); hover = true; tx = x - r.left; ty = y - r.top; }, () => hover = false);
   demoTicks.push(now => {
     if (!isVis(tile)) return;
-    const W = tile.clientWidth, H = tile.clientHeight;
     if (!hover) { tx = W / 2 + Math.cos(now / 1300) * W * .32; ty = H / 2 + Math.sin(now / 900) * H * .28; }
     cx = lerp(cx, tx, .12); cy = lerp(cy, ty, .12);
     tile.style.setProperty('--x', cx.toFixed(1) + 'px'); tile.style.setProperty('--y', cy.toFixed(1) + 'px');
